@@ -1,0 +1,4 @@
+[submodule "reference"]
+    path = reference
+    url = git@github.com:technion-csl/hpcc.git
+    dirty = ignore

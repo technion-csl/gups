@@ -1,3 +1,11 @@
+# My binaries
+serial
+parallel
+
+# My output files
+validation/
+scalability/
+
 # Prerequisites
 *.d
 
