@@ -1,5 +1,15 @@
 # tl;dr
 The single-core kernel of GUPS (aka RandomAccess) from the HPC Challenge benchmark suite.
+There are two executables: `serial`, which runs a single thread of GUPS, and `parallel`, which runs a multi-threaded version implemented with OpenMP.
+To build them, please invoke `make`.
+To run GUPS on a 1GB array (== 2^27 cells of unsigned 64-bit integers):
+```
+$ ./serial --log2length 27
+```
+And to run GUPS with four threads on a 1GB array:
+```
+ $ OMP_NUM_THREADS=3 ./parallel --log2length 27
+```
 
 # Motivation
 According to its [website](https://icl.utk.edu/hpcc/), the HPC Challenge (HPCC) suite measures a range memory access patterns and consists of seven benchmarks: HPL, DGEMM, STREAM, PTRANS, RandomAccess, FFT, and Communication bandwidth and latency. Strangely, the suite links all these benchmarks into a single, monolithic executable that runs them one by one.
