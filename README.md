@@ -1,14 +1,16 @@
-# tl;dr
+# TL;DR
 The single-core kernel of GUPS (aka RandomAccess) from the HPC Challenge benchmark suite.
-There are two executables: `serial`, which runs a single thread of GUPS, and `parallel`, which runs a multi-threaded version implemented with OpenMP.
-To build them, please invoke `make`.
+
+# How to build and run
+Simply invoke `make` to build the two executables: `serial`, which runs a single thread of GUPS, and `parallel`, which runs a multi-threaded version implemented with OpenMP.
+
 To run GUPS on a 1GB array (== 2^27 cells of unsigned 64-bit integers):
 ```
 $ ./serial --log2length 27
 ```
-And to run GUPS with four threads on a 1GB array:
+To run GUPS with four threads on a 1GB array:
 ```
- $ OMP_NUM_THREADS=3 ./parallel --log2length 27
+$ OMP_NUM_THREADS=3 ./parallel --log2length 27
 ```
 
 # Motivation
