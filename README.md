@@ -2,15 +2,15 @@
 The single-core kernel of GUPS (aka RandomAccess) from the HPC Challenge benchmark suite.
 
 # How to build and run
-Simply invoke `make` to build the two executables: `serial`, which runs a single thread of GUPS, and `parallel`, which runs a multi-threaded version implemented with OpenMP.
+Simply invoke `make` to build the `gups` executable, which runs the multi-threaded version (implemented with OpenMP).
 
 To run GUPS on a 1GB array (== 2^27 cells of unsigned 64-bit integers):
 ```
-$ ./serial --log2length 27
+$ OMP_NUM_THREADS=1 ./gups --log2_length 27
 ```
-To run GUPS with four threads on a 1GB array:
+To run GUPS with four threads on a 2GB array:
 ```
-$ OMP_NUM_THREADS=3 ./parallel --log2length 27
+$ OMP_NUM_THREADS=3 ./gups --log2_length 28
 ```
 
 # Motivation
@@ -28,7 +28,7 @@ The changes with respect to the original code are:
 # Validation against the original HPCC benchmark
 `make compare` validates the performance of this new implementation against the reference HPCC implementation. My tests on my Intel i7-6600U CPU (Skylake) produced the following performance numbers (giga updates per second):
 
-|           | serial	| reference |
+|           | ours      | reference |
 |-----------|-----------|-----------|
 | repeat1   | 0.0295	| 0.0297    |
 | repeat2   | 0.0305	| 0.0321    |
@@ -46,9 +46,7 @@ GUPS seems like an embarrassingly parallel workload because it can issue many th
 
 My first guess was that the problem is false sharing of the random number array, which is accessed in the main loop like this:
 ```
-#ifdef _OPENMP
 #pragma omp parallel for
-#endif
     for (j=0; j<128; j++) {
       ran[j] = (ran[j] << 1) ^ ((s64Int) ran[j] < 0 ? POLY : 0);
       Table[ran[j] & (TableSize-1)] ^= ran[j];
