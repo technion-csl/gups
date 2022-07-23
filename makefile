@@ -8,7 +8,7 @@ SHELL := /bin/bash
 ##### Constants #####
 
 CXX := g++
-CXXFLAGS := -Wall -Werror -Wextra -pedantic -O3 -std=c++11
+CXXFLAGS := -Wall -Werror -Wextra -pedantic -O3 -std=c++11 -fopenmp
 ifdef DEBUG
 	CXXFLAGS += -g
 endif
@@ -20,36 +20,30 @@ SCALABILITY_DIR := scalability
 
 ##### Targets #####
 
-SERIAL := serial
-PARALLEL := parallel
 REFERENCE_MAKEFILE := $(REFERENCE_DIR)/makefile
 REFERENCE := $(REFERENCE_DIR)/single_random_access
-BINARIES := $(SERIAL) $(PARALLEL)
+BINARY := gups
 
 ##### Recipes #####
 
 .PHONY: all test clean
 
-all: $(BINARIES)
+all: $(BINARY)
 
-$(BINARIES): $(SOURCE_FILES) $(HEADER_FILES)
+$(BINARY): $(SOURCE_FILES) $(HEADER_FILES)
 	$(CXX) $(CXXFLAGS) -o $@ $(SOURCE_FILES)
 
-$(PARALLEL): CXXFLAGS += -DOPENMP -fopenmp
-
-test: $(BINARIES)
-	./$(SERIAL) --log2length 27 --verify
-	./$(PARALLEL) --log2length 27 --verify
+test: $(BINARY)
+	OMP_NUM_THREADS=1 ./$< --log2_length 27 --verify
 
 $(REFERENCE): $(REFERENCE_MAKEFILE)
-	cd $(REFERENCE_DIR)
-	make
+	cd $(REFERENCE_DIR) && $(MAKE)
 
 $(REFERENCE_MAKEFILE):
 	git submodule update --init --progress $(REFERENCE_DIR)
 
 clean:
-	rm -f $(BINARIES) $(REFERENCE)
+	rm -f $(BINARY) $(REFERENCE)
 
 include $(VALIDATION_DIR)/module.mk
 include $(SCALABILITY_DIR)/module.mk

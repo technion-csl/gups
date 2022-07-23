@@ -52,18 +52,12 @@
 #include <cassert>
 #include <chrono>
 
+// Pad the random number array to avoid false sharing (altough it doesn't really help...)
+// constexpr std::size_t hardware_destructive_interference_size = 8;
 constexpr std::size_t hardware_destructive_interference_size = 64;
-//constexpr std::size_t hardware_destructive_interference_size = 8;
-
 struct aligned_int {
     alignas(hardware_destructive_interference_size) uint64_t x;
 };
-
-#ifdef OPENMP
-bool is_parallel = true;
-#else
-bool is_parallel = false;
-#endif
 
 char* GetOption(char ** begin, char ** end, const std::string & option) {
     char ** itr = std::find(begin, end, option);
@@ -131,45 +125,32 @@ bool verify(uint64_t array[], uint64_t array_length, uint64_t num_updates) {
     }
     std::cout << "Summary: " << errors << " errors were found.\n";
 
-    if (is_parallel) {
-        double error_tolerance = 0.01 * array_length;
-        if (errors >= error_tolerance) {
-            std::cout << "Failed: the parallel version should have < " << error_tolerance << " errors.\n";
-            return false;
-        }
+    double error_tolerance = 0.01 * array_length;
+    if (errors >= error_tolerance) {
+        std::cout << "Failed: should have < " << error_tolerance << " errors.\n";
+        return false;
     } else {
-        if (errors > 0) {
-            std::cout << "Failed: the serial run should have zero errors.\n";
-            return false;
-        }
+        std::cout << "Passed.\n";
+        return true;
     }
-
-    std::cout << "Passed.\n";
-    return true;
 }
 
 int main(int argc, char* argv[]) {
-    if (is_parallel) {
-        std::cout << "Running the parallel version\n";
-    } else {
-        std::cout << "Running the serial version\n";
-    }
-
     /* Parse command line options */
     if (DoesOptionExist(argv, argv+argc, "-h") ||
             DoesOptionExist(argv, argv+argc, "--help")) {
-        std::cout << "Usage: " << argv[0] << " [--log2length L] [--log2iterations I] [--verify]\n";
+        std::cout << "Usage: " << argv[0] << " [--log2_length L] [--log2_iterations I] [--verify]\n";
         return 0;
     }
 
     // Default array length = 128M (==> 1GB sized array)
     uint64_t log2_array_length = 27ul;
-    if (DoesOptionExist(argv, argv+argc, "--log2length")) {
-        std::string log2length_string = GetOption(argv, argv+argc, "--log2length");
+    if (DoesOptionExist(argv, argv+argc, "--log2_length")) {
+        std::string log2_length_string = GetOption(argv, argv+argc, "--log2_length");
         try {
-            log2_array_length = std::stoul(log2length_string);
+            log2_array_length = std::stoul(log2_length_string);
         } catch (const std::exception& e) {
-            std::cerr << "Invalid number for the --log2length option!\n";
+            std::cerr << "Invalid number for the --log2_length option!\n";
             return 1;
         }
     }
@@ -177,12 +158,12 @@ int main(int argc, char* argv[]) {
 
     // Default number of iterations = 1
     uint64_t log2_iterations = 0ul;
-    if (DoesOptionExist(argv, argv+argc, "--log2iterations")) {
-        std::string log2iterations_string = GetOption(argv, argv+argc, "--log2iterations");
+    if (DoesOptionExist(argv, argv+argc, "--log2_iterations")) {
+        std::string log2_iterations_string = GetOption(argv, argv+argc, "--log2_iterations");
         try {
-            log2_iterations = std::stoul(log2iterations_string);
+            log2_iterations = std::stoul(log2_iterations_string);
         } catch (const std::exception& e) {
-            std::cerr << "Invalid number for the --log2iterations option!\n";
+            std::cerr << "Invalid number for the --log2_iterations option!\n";
             return 1;
         }
     }
@@ -235,9 +216,7 @@ int main(int argc, char* argv[]) {
 
         /* Perform updates to main table */
         for (uint64_t i = 0; i < num_updates / num_parallel_accesses; i++) {
-#ifdef OPENMP
 #pragma omp parallel for
-#endif
             for (uint64_t j = 0; j < num_parallel_accesses; j++) {
                 uint64_t r = random_index[j].x;
                 r = (r << 1) ^ ((int64_t) r < 0 ? POLY : 0);
