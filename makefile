@@ -12,39 +12,39 @@ CXXFLAGS := -Wall -Werror -Wextra -pedantic -O3 -std=c++11 -fopenmp
 ifdef DEBUG
 	CXXFLAGS += -g
 endif
-SOURCE_FILES := main.cc
-HEADER_FILES :=
-REFERENCE_DIR := reference
-VALIDATION_DIR := validation
-SCALABILITY_DIR := scalability
+source_files := main.cc
+header_files :=
+reference_dir := reference
+validation_dir := validation
+scalability_dir := scalability
 
 ##### Targets #####
 
-REFERENCE_MAKEFILE := $(REFERENCE_DIR)/makefile
-REFERENCE := $(REFERENCE_DIR)/single_random_access
-BINARY := gups
+reference_makefile := $(reference_dir)/makefile
+reference := $(reference_dir)/single_random_access
+binary := gups
 
 ##### Recipes #####
 
 .PHONY: all test clean
 
-all: $(BINARY)
+all: $(binary)
 
-$(BINARY): $(SOURCE_FILES) $(HEADER_FILES)
-	$(CXX) $(CXXFLAGS) -o $@ $(SOURCE_FILES)
+$(binary): $(source_files) $(header_files)
+	$(CXX) $(CXXFLAGS) -o $@ $(source_files)
 
-test: $(BINARY)
+test: $(binary)
 	OMP_NUM_THREADS=1 ./$< --log2_length 27 --verify
 
-$(REFERENCE): $(REFERENCE_MAKEFILE)
-	cd $(REFERENCE_DIR) && $(MAKE)
+$(reference): $(reference_makefile)
+	cd $(reference_dir) && $(MAKE)
 
-$(REFERENCE_MAKEFILE):
-	git submodule update --init --progress $(REFERENCE_DIR)
+$(reference_makefile):
+	git submodule update --init --progress $(reference_dir)
 
 clean:
-	rm -f $(BINARY) $(REFERENCE)
+	rm -f $(binary) $(reference)
 
-include $(VALIDATION_DIR)/module.mk
-include $(SCALABILITY_DIR)/module.mk
+include $(validation_dir)/module.mk
+include $(scalability_dir)/module.mk
 

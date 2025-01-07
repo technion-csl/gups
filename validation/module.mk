@@ -1,21 +1,26 @@
 ##### Targets #####
-
-SERIAL_RESULTS := $(VALIDATION_DIR)/serial_results.txt
-REFERENCE_RESULTS := $(VALIDATION_DIR)/reference_results.txt
+our_results := $(validation_dir)/our_results.txt
+ref_results := $(validation_dir)/ref_results.txt
+all_results := $(validation_dir)/results.txt
 
 ##### Recipes #####
 
-.PHONY: validate
+.PHONY: validate validate/clean
 
-validate: $(SERIAL_RESULTS) $(REFERENCE_RESULTS)
-	cat $<
+validate: $(all_results)
 
-$(SERIAL_RESULTS): $(SERIAL)
-	(for i in $$(seq 1 5); do ./$(SERIAL) --log2length 27 ; done) | grep GUPS | cut -d"=" -f2 | tr -d " " > $@
+$(all_results): $(our_results) $(ref_results)
+	paste $^ > $@
 
-$(REFERENCE_RESULTS): $(REFERENCE)
-	cd $(VALIDATION_DIR)
+$(our_results): $(binary)
+	(for i in $$(seq 1 5); do ./$(binary) --log2length 27 ; done) | grep GUPS | cut -d"=" -f2 | tr -d " " > $@
+
+$(ref_results): $(reference)
+	cd $(validation_dir)
 	echo "Total=2048" > hpccmemf.txt
-	for i in $$(seq 1 5); do ../$(REFERENCE) ; done
+	for i in $$(seq 1 5); do ../$(reference) ; done
 	grep "Single GUP/s" hpccoutf.txt | cut -d" " -f3 > $(notdir $@)
+
+validate/clean:
+	rm -f $(our_results) $(ref_results) $(all_results) hpccoutf.txt
 

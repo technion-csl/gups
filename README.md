@@ -10,12 +10,14 @@ $ OMP_NUM_THREADS=1 ./gups --log2_length 27
 ```
 To run GUPS with four threads on a 2GB array:
 ```
-$ OMP_NUM_THREADS=3 ./gups --log2_length 28
+$ OMP_NUM_THREADS=4 ./gups --log2_length 28
 ```
 
 # Motivation
 According to its [website](https://icl.utk.edu/hpcc/), the HPC Challenge (HPCC) suite measures a range memory access patterns and consists of seven benchmarks: HPL, DGEMM, STREAM, PTRANS, RandomAccess, FFT, and Communication bandwidth and latency. Strangely, the suite links all these benchmarks into a single, monolithic executable that runs them one by one.
-This repo re-implements one of the seven benchmarks -- RandomAccess -- so it can be run alone. Additionally, this repo cleans the original code and remove MPI dependencies. The original code can be cloned from the official github repo: https://github.com/icl-utk-edu/hpcc . My code mostly borrows from the file `RandomAccess/core_single_cpu.c` in this repo. I therefore included the original copyright notice.
+This repo extracts one of the seven benchmarks -- RandomAccess -- so it can be run alone.
+Most of our code borrows from the file `RandomAccess/core_single_cpu.c` of the official github repo: https://github.com/icl-utk-edu/hpcc (the original copyright notice is included).
+We additionally clean the code and remove MPI dependencies.
 
 # Summary of changes
 The changes with respect to the original code are:
