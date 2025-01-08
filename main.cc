@@ -52,13 +52,6 @@
 #include <cassert>
 #include <chrono>
 
-// Pad the random number array to avoid false sharing (altough it doesn't really help...)
-// constexpr std::size_t hardware_destructive_interference_size = 8;
-constexpr std::size_t hardware_destructive_interference_size = 64;
-struct aligned_int {
-    alignas(hardware_destructive_interference_size) uint64_t x;
-};
-
 char* GetOption(char ** begin, char ** end, const std::string & option) {
     char ** itr = std::find(begin, end, option);
     if (itr != end && ++itr != end) {
@@ -201,7 +194,6 @@ int main(int argc, char* argv[]) {
     auto start = std::chrono::steady_clock::now();
 
     /* Calculate the initial seeds only once for all iterations */
-    // constexpr std::size_t hardware_destructive_interference_size = 64;
     uint64_t seeds[num_parallel_accesses];
     for (uint64_t j = 0; j < num_parallel_accesses; j++) {
         seeds[j] = random_seed((num_updates / num_parallel_accesses) * j);
@@ -209,19 +201,12 @@ int main(int argc, char* argv[]) {
 
     /* Iterate over the original HPCC loop */
     for (uint64_t k = 0; k < num_iterations; k++) {
-        aligned_int random_index[num_parallel_accesses];
-        for (uint64_t i = 0; i < num_parallel_accesses; i++) {
-            random_index[i].x = seeds[i];
-        }
-
         /* Perform updates to main table */
         for (uint64_t i = 0; i < num_updates / num_parallel_accesses; i++) {
 #pragma omp parallel for
             for (uint64_t j = 0; j < num_parallel_accesses; j++) {
-                uint64_t r = random_index[j].x;
-                r = (r << 1) ^ ((int64_t) r < 0 ? POLY : 0);
-                array[r & (array_length-1)] ^= r;
-                random_index[j].x = r;
+                seeds[j] = (seeds[j] << 1) ^ ((int64_t) seeds[j] < 0 ? POLY : 0);
+                array[seeds[j] & (array_length-1)] ^= seeds[j];
             }
         }
     }
