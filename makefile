@@ -28,3 +28,6 @@ $(binary): $(source_files) $(header_files)
 test: $(binary)
 	./$< --log2_length 27 --verify
 
+clean:
+	rm -f $(binary)
+
