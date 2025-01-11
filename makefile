@@ -13,13 +13,8 @@ ifdef DEBUG
 endif
 source_files := main.cc
 header_files :=
-reference_dir := reference
-validation_dir := validation
-scalability_dir := scalability
 
 ##### Targets #####
-reference_makefile := $(reference_dir)/makefile
-reference := $(reference_dir)/single_random_access
 binary := gups
 
 ##### Recipes #####
@@ -32,17 +27,4 @@ $(binary): $(source_files) $(header_files)
 
 test: $(binary)
 	./$< --log2_length 27 --verify
-
-$(reference): $(reference_makefile)
-	cd $(reference_dir) && $(MAKE)
-
-$(reference_makefile):
-	git submodule update --init --progress $(reference_dir)
-
-clean: validation/clean scalability/clean
-	rm -f $(binary) $(reference)
-	cd $(reference_dir) && $(MAKE) clean
-
-include $(validation_dir)/module.mk
-include $(scalability_dir)/module.mk
 
