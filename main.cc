@@ -203,7 +203,6 @@ int main(int argc, char* argv[]) {
     for (uint64_t k = 0; k < num_iterations; k++) {
         /* Perform updates to main table */
         for (uint64_t i = 0; i < num_updates / num_parallel_accesses; i++) {
-#pragma omp parallel for
             for (uint64_t j = 0; j < num_parallel_accesses; j++) {
                 seeds[j] = (seeds[j] << 1) ^ ((int64_t) seeds[j] < 0 ? POLY : 0);
                 array[seeds[j] & (array_length-1)] ^= seeds[j];

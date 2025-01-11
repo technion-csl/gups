@@ -7,7 +7,7 @@ SHELL := /bin/bash
 
 ##### Constants #####
 CXX := g++
-CXXFLAGS := -Wall -Werror -Wextra -pedantic -O3 -std=c++11 -fopenmp
+CXXFLAGS := -Wall -Werror -Wextra -pedantic -O3 -std=c++11
 ifdef DEBUG
 	CXXFLAGS += -g
 endif
@@ -31,7 +31,7 @@ $(binary): $(source_files) $(header_files)
 	$(CXX) $(CXXFLAGS) -o $@ $(source_files)
 
 test: $(binary)
-	OMP_NUM_THREADS=1 ./$< --log2_length 27 --verify
+	./$< --log2_length 27 --verify
 
 $(reference): $(reference_makefile)
 	cd $(reference_dir) && $(MAKE)
