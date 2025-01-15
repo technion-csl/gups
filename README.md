@@ -19,7 +19,7 @@ We additionally clean the code and remove MPI and OpenMP dependencies.
 The changes with respect to the original code are:
 1. Specify the array size through a command-line argument.
 2. Specify the number of iterations through a command-line argument. A single iteration goes over the array 4x (like in the original HPCC implementation) without running the initialization phase (array[i] = i). The default number of iterations is set to one, compatible to the HPCC implementation.
-3. Scrape off the MPI and openMP related functions.
+3. Scrape off MPI and openMP related functions.
 4. Migrate the code to C++ and build it with g++.
 5. Introduce a new-command line flag, "--verify", that enables the final verification step. Verification is disabled by default because the comments in `core_single_cpu.c` say it is optional.
 
